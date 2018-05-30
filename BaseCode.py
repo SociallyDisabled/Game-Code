@@ -1,7 +1,5 @@
 import pygame as pg
 import random
-from settings import *
-from sprites import *
 
 class Game:
     def __init__(self):
@@ -40,7 +38,6 @@ class Game:
     def draw(self):
         self.screen.fill(BLACK)
         self.all_sprites.draw(self.screen)
-        # *after* drawing everything, flip the display
         pg.display.flip()
 
     def show_start_screen(self):
