@@ -13,33 +13,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-class Player(pg.sprite.Sprite):
-    def __init(self):
-        pg.sprite.Sprite.__init__(self)
-        self.image = pg.Surface((30, 40))
-        self.image.fill(BLUE)
-        self.rect = self.image.get_rect()
-        self.rect.center =(WIDTH /2, HEIGHT /2)
-        self.vel = vec(0, 0)
-        self.acc = vec(0. 0)
-
-    def update(self):
-        self.acc = vec(0, 0.5)
-        keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT]:
-            self.acc.x = -PLAYER_ACC
-        if keys[pg.K_RIGHT]:
-            self.acc.x = PLAYER_ACC
-
-        self.rect.x += self.vx
-        self.rect.y += self.vy
-
-        if self.pos.x > WIDTH:
-            self.pos.x = 0
-        if self.pos.x < 0:
-            self.pos.x = WIDTH
-
-        self.rect.center = self.pos
+PLAYER_ACC = 0.5
+PLAYER_FRICTION = -.12
 
 class Game:
     def __init__(self):
@@ -53,7 +28,7 @@ class Game:
 
     def new(self):
         #start a new game
-        self.all_sprites = pg.sprites.Group()
+        self.all_sprites = pg.sprite.Group()
         self.player = Player()
         self.all_sprites.add(self.player)
         self.run()
@@ -68,7 +43,7 @@ class Game:
             self.draw()
 
     def update(self):
-        self.all.sprites.update()
+        self.all_sprites.update()
 
     def events(self):
         for event in pg.event.get():
@@ -89,6 +64,38 @@ class Game:
     def show_go_screen(self):
         #game over screen
         pass
+
+class Player(pg.sprite.Sprite):
+    def __init__(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((30, 40))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH /2, HEIGHT /2)
+        self.pos = vec(WIDTH / 2, HEIGHT /2)
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+
+    def update(self):
+        self.acc = vec(0, 0)
+        keys = pg.key.get_pressed()
+        if keys[pg.K_LEFT]:
+            self.acc.x = -PLAYER_ACC
+        if keys[pg.K_RIGHT]:
+            self.acc.x = PLAYER_ACC
+
+        #player friction
+        self.acc += self.vel * PLAYER_FRICTION
+
+        self.vel += self.acc
+        self.pos += self.vel + 0.5 * self.acc
+
+        if self.pos.x > WIDTH:
+            self.pos.x = 0
+        if self.pos.x < 0:
+            self.pos.x = WIDTH
+
+        self.rect.center = self.pos
 
 g = Game()
 g.show_start_screen()
