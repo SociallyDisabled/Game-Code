@@ -1,8 +1,10 @@
-import pygame
+import pygame as pg
 import random
+vec = pg.math.Vector2
 
-WIDTH = 1600
-HEIGHT = 900
+TITLE = "GAME"
+WIDTH = 800
+HEIGHT = 450
 FPS = 60
 
 WHITE = (255, 255, 255)
@@ -11,48 +13,87 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-# assets
-game_folder = os.path.dirname(__file__)
-image_folder = os.path.join(game_folder, "Downloads")
-
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50, 50))
-        self.image.fill(GREEN)
+class Player(pg.sprite.Sprite):
+    def __init(self):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((30, 40))
+        self.image.fill(BLUE)
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.rect.center =(WIDTH /2, HEIGHT /2)
+        self.vel = vec(0, 0)
+        self.acc = vec(0. 0)
 
     def update(self):
-        self.rect.x += 5
-        if self.rect.left > WIDTH:
-            self.rect.right = 0
+        self.acc = vec(0, 0.5)
+        keys = pg.key.get_pressed()
+        if keys[pg.K_LEFT]:
+            self.acc.x = -PLAYER_ACC
+        if keys[pg.K_RIGHT]:
+            self.acc.x = PLAYER_ACC
 
+        self.rect.x += self.vx
+        self.rect.y += self.vy
 
-# creates window
-pygame.init()
-pygame.mixer.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Game")
-clock = pygame.time.Clock()
+        if self.pos.x > WIDTH:
+            self.pos.x = 0
+        if self.pos.x < 0:
+            self.pos.x = WIDTH
 
-all_sprites = pygame.sprites.Group()
-player = Player()
-all_sprites.add(player)
+        self.rect.center = self.pos
 
-# game loop
-running = True
-while running:
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+class Game:
+    def __init__(self):
+        #creates window
+        pg.init()
+        pg.mixer.init()
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        pg.display.set_caption(TITLE)
+        self.clock = pg.time.Clock()
+        self.running = True
 
-    all_sprites.update()
+    def new(self):
+        #start a new game
+        self.all_sprites = pg.sprites.Group()
+        self.player = Player()
+        self.all_sprites.add(self.player)
+        self.run()
 
-    screen.fill(BLACK)
-    all_sprites.draw(screen)
-    pygame.display.flip()
+    def run(self):
+        #game loop
+        self.playing = True
+        while self.playing:
+            self.clock.tick(FPS)
+            self.events()
+            self.update()
+            self.draw()
 
-pygame.quit()
+    def update(self):
+        self.all.sprites.update()
+
+    def events(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                if self.playing:
+                    self.playing = False
+                self.running = False
+
+    def draw(self):
+        self.screen.fill(BLACK)
+        self.all_sprites.draw(self.screen)
+        pg.display.flip()
+
+    def show_start_screen(self):
+        #start screen
+        pass
+
+    def show_go_screen(self):
+        #game over screen
+        pass
+
+g = Game()
+g.show_start_screen()
+while g.running:
+    g.new()
+    g.show_go_screen
+
+pg.quit()
