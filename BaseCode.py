@@ -1,55 +1,58 @@
-import pygame as pg
+import pygame
 import random
 
-class Game:
+WIDTH = 1600
+HEIGHT = 900
+FPS = 60
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+# assets
+game_folder = os.path.dirname(__file__)
+image_folder = os.path.join(game_folder, "Downloads")
+
+
+class Player(pygame.sprite.Sprite):
     def __init__(self):
-        pg.init()
-        pg.mixer.init()
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        pg.display.set_caption(TITLE)
-        self.clock = pg.time.Clock()
-        self.running = True
-
-    def new(self):
-        self.all_sprites = pg.sprite.Group()
-        self.player = Player()
-        self.all_sprites.add(self.player)
-        self.run()
-
-    def run(self):
-        self.playing = True
-        while self.playing:
-            self.clock.tick(FPS)
-            self.events()
-            self.update()
-            self.draw()
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((50, 50))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)
 
     def update(self):
-        self.all_sprites.update()
+        self.rect.x += 5
+        if self.rect.left > WIDTH:
+            self.rect.right = 0
 
-    def events(self):
-        for event in pg.event.get():
-            # check for closing window
-            if event.type == pg.QUIT:
-                if self.playing:
-                    self.playing = False
-                self.running = False
 
-    def draw(self):
-        self.screen.fill(BLACK)
-        self.all_sprites.draw(self.screen)
-        pg.display.flip()
+# creates window
+pygame.init()
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Game")
+clock = pygame.time.Clock()
 
-    def show_start_screen(self):
-        pass
+all_sprites = pygame.sprites.Group()
+player = Player()
+all_sprites.add(player)
 
-    def show_go_screen(self):
-        pass
+# game loop
+running = True
+while running:
+    clock.tick(FPS)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-g = Game()
-g.show_start_screen()
-while g.running:
-    g.new()
-    g.show_go_screen()
+    all_sprites.update()
 
-pg.quit()
+    screen.fill(BLACK)
+    all_sprites.draw(screen)
+    pygame.display.flip()
+
+pygame.quit()
