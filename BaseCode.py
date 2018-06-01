@@ -13,8 +13,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-PLAYER_ACC = 0.5
-PLAYER_FRICTION = -.12
+PLAYER_ACC = 8.0
+PLAYER_FRICTION = -0.8
 
 class Game:
     def __init__(self):
