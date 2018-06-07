@@ -7,6 +7,13 @@ WIDTH = 800
 HEIGHT = 450
 FPS = 60
 
+#(x, y, w, h)
+PLATFORM_LIST = [(0, -40, WIDTH * 2, 40),
+                (WIDTH / 2 - 50, HEIGHT * 3 / 4 , 100, 20), 
+                (125, HEIGHT - 350, 100, 20), 
+                (350, 200, 100, 20), 
+                (175, 100, 50, 20)]
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -15,6 +22,7 @@ BLUE = (0, 0, 255)
 
 PLAYER_ACC = 8.0
 PLAYER_FRICTION = -0.8
+PLAYER_GRAV = 0.5
 
 class Game:
     def __init__(self):
@@ -29,8 +37,14 @@ class Game:
     def new(self):
         #start a new game
         self.all_sprites = pg.sprite.Group()
-        self.player = Player()
+        self.platforms = pg.sprite.Group()
+        self.player = Player(self)
         self.all_sprites.add(self.player)
+        for plat in PLATFORM_LIST:
+            #P = Platform(plat[0], plat[1], plat[2], plat[3])
+            p = Platfrom(*plat)
+            self.all_sprites.add(p)
+            self.platforms.add(p)
         self.run()
 
     def run(self):
@@ -44,6 +58,29 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
+        #check for platform
+        if self.player.vel.y > 0:
+            hits = pg.sprite.spritecollide(self.player, self.platforms, False)
+            if hits:
+                self.player.pos.y = hits[0].rect.top
+                #self.player.pos = hits[0].rect.top + 1  
+                self.player.vel.y = 0
+        if self.player.rect.top <= HEIGHT / 2:
+            self.player.pos.y += abs(self.player.vel.y)
+            for plat in self.platforms:
+                plat.rect.y += abs(self.player.vel.y)
+        #if self.player.rect.top >= HEIGHT / 2:
+            #self.player.pos.y -= abs(self.player.vel.y)
+            #for plat in self.platforms:
+                #plat.rect.y -= abs(self.player.vel.y)
+        #if self.player.rect.right <= WIDTH / 2:
+            #self.player.pos.x +=abs(self.player.vel.x)
+            #for plat in self.platforms:
+                #plat.rect.x += abs(self.player.vel.x)
+        #if self.player.rect.right >= WIDTH / 2:
+            #self.player.pos.x -=abs(self.player.vel.x)
+            #for plat in self.platforms:
+                #plat.rect.x -= abs(self.player.vel.x)
 
     def events(self):
         for event in pg.event.get():
@@ -51,6 +88,9 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    self.player.jump()
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -66,8 +106,9 @@ class Game:
         pass
 
 class Player(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, game):
         pg.sprite.Sprite.__init__(self)
+        self.game = game
         self.image = pg.Surface((30, 40))
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
@@ -76,8 +117,16 @@ class Player(pg.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
 
+    def jump(self):
+    #will jump only on platform
+    self.rect.x += 1
+    hits = pg.sprite.spritecollide(self, self.game.platforms, False)
+    self.rect.x -= 1
+    if hits:
+        self.vel.y = -20
+
     def update(self):
-        self.acc = vec(0, 0)
+        self.acc = vec(0, PLAYER_GRAV)
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT]:
             self.acc.x = -PLAYER_ACC
@@ -85,7 +134,7 @@ class Player(pg.sprite.Sprite):
             self.acc.x = PLAYER_ACC
 
         #player friction
-        self.acc += self.vel * PLAYER_FRICTION
+        self.acc.x += self.vel.x * PLAYER_FRICTION
 
         self.vel += self.acc
         self.pos += self.vel + 0.5 * self.acc
@@ -95,7 +144,16 @@ class Player(pg.sprite.Sprite):
         if self.pos.x < 0:
             self.pos.x = WIDTH
 
-        self.rect.center = self.pos
+        self.rect.midbottom = self.pos
+
+class Platform(pg.sprite.Sprite):
+    def __init__(self, x, y, w, h):
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((w, h))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 g = Game()
 g.show_start_screen()
