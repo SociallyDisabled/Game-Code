@@ -37,6 +37,10 @@ GO_LIST = ["This Was Your Fault",
            "You Have Dead",
            "This Was Not Your Fault"]
 
+#(x, y, w, h)
+PLATFORM_LIST = [(0, -40, WIDTH, 40),
+                (WIDTH / 2 - 50, HEIGHT * 3 / 4 , 100, 20)]
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -48,7 +52,6 @@ PLAYER_ACC = 7.0
 PLAYER_FRICTION = -0.7
 PLAYER_GRAV = 0.5
 PLAYER_JUMP = 18
-
 
 class Game:
    def __init__(self):
