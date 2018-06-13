@@ -47,7 +47,7 @@ DEEP_BLUE = (0, 2, 43)
 PLAYER_ACC = 7.0
 PLAYER_FRICTION = -0.7
 PLAYER_GRAV = 0.5
-PLAYER_JUMP = 13
+PLAYER_JUMP = 18
 
 
 class Game:
@@ -75,13 +75,14 @@ class Game:
            except:
                self.highscore = 0
         #load spritesheet image
-        self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
+       self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
 
    def new(self):
        # start a new game
        self.score = 0
        self.all_sprites = pg.sprite.Group()
        self.platforms = pg.sprite.Group()
+       self.items = pg.sprite.Group()
        self.player = Player(self)
        self.all_sprites.add(self.player)
        for plat in PLATFORM_LIST1:
@@ -110,10 +111,12 @@ class Game:
                for hit in hits:
                    if hit.rect.bottom > lowest.rect.bottom:
                        lowest = hit
-               if self.player.pos.y < lowest.rect.bottom:
-                    #self.player.pos.y = hits[0].rect.top
-                    self.player.pos.y = lowest.rect.top + 1
-                    self.player.vel.y = 0
+               if self.player.pox.x < lowest.rect.right + 5 and self.player.pos.x > lowest.rect.left + 5:
+                    if self.player.pos.y < lowest.rect.bottom:
+                        #self.player.pos.y = hits[0].rect.top
+                        self.player.pos.y = lowest.rect.top + 1
+                        self.player.vel.y = 0
+                        self.player.jumping = False
        # scrolls the screen to follow player
        if self.player.rect.top <= HEIGHT / 2:
            self.player.pos.y += abs(self.player.vel.y)
@@ -257,12 +260,19 @@ class Player(pg.sprite.Sprite):
            self.run_frames_r.append(pg.transform.flip(frame, True, False))
        self.jump_frame = self.game.spritesheet.get_image(0, 216, 28, 22)
 
+   def jump_cut(self):
+       if self.jumping:
+           if self.vel.y < -3:
+               self.vel.y = -3
+
+
    def jump(self):
        # will jump only on platform
        self.rect.x += 2
        hits = pg.sprite.spritecollide(self, self.game.platforms, False)
        self.rect.x -= 2
-       if hits:
+       if hits and not self.jumping:
+           self.jumping = True
            self.vel.y = -PLAYER_JUMP
 
    def update(self):
@@ -310,6 +320,7 @@ class Player(pg.sprite.Sprite):
 
 class Platform(pg.sprite.Sprite):
    def __init__(self, game, x, y):
+       self.groups = game.all_sprites, game.platforms
        pg.sprite.Sprite.__init__(self)
        self.game = game
        images = [#platform xml co-ords
@@ -319,6 +330,33 @@ class Platform(pg.sprite.Sprite):
        self.rect = self.image.get_rect()
        self.rect.x = x
        self.rect.y = y
+
+class Item(pg.sprite.Sprite):
+   def __init__(self, game, plat):
+       self.groups = game.all_sprites, game.items
+       pg.sprite.Sprite.__init__(self, self.groups)
+       self.game = game
+       self.plat = plat
+       self.type = random.choice([#Standard Items
+                                  'Thick Dew', 'Thornquill', 'Shock Bracelet',
+                                  'Illicit Acquisitions', 'Bronze Monocle',
+                                  #Priority Items
+                                  'Antique Dollar Bill', 'Potent Brew', 'Eclipse Dagger',
+                                  'Civilian Taser', 'Box o Wonders',
+                                  #Fragile Items
+                                  "Family Ruby", "Broken Watch",
+                                  "Purple Amulet", "Regenerophage Sample",
+                                  #Military Items
+                                  "Portable AI Mines", "Defective Tesla Gun",
+                                  "Targeting System Scope", "Wrist Mounted Micro Cannon",
+                                  "Portable AT Mine Layer"])
+       self.image.set_colorkey(BLACK)
+       self.rect = self.image.get_rect()
+       self.rect.centerx = self.plat.rect.centerx
+       self.rect.bottom = self.plat.rect.top - 5
+
+   def update(self):
+       self.rect.bottom = self.plat.rect.top - 5
 
 class Muk(pg.sprite.Sprite):
    def __init__(self):
