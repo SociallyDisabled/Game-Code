@@ -101,12 +101,12 @@ class Game:
        img_dir = path.join(self.dir, 'img')
        self.background = pg.image.load(path.join(img_dir, "Nacht_Himmel.png")).convert()
        self.background_rect = self.background.get_rect()
-       self.jungleplat_img = pg.image.load(path.join(img_dir, JUNGLEPLAT)).convert_alpha()
-       self.crashplat_img = pg.image.load(path.join(img_dir, CRASHPLAT)).convert_alpha()
-       self.small1_idle = pg.image.load(path.join(img_dir, SE1_IMG)).convert.alpha()
-       self.large1_idle = pg.image.load(path.join(img_dir, LE1_IMG)).convert_alpha()
-       self.small2_idle = pg.image.load(path.join(img_dir, SE2_IMG)).convert_alpha()
-       self.large2_idle = pg.image.load(path.join(img_dir, LE2_IMG)).convert_alpha()
+       self.jungleplat_img = pg.image.load(path.join(img_dir, JUNGLEPLAT)).convert()
+       self.crashplat_img = pg.image.load(path.join(img_dir, CRASHPLAT)).convert()
+       self.small1_idle = pg.image.load(path.join(img_dir, SE1_IMG)).convert()
+       self.large1_idle = pg.image.load(path.join(img_dir, LE1_IMG)).convert()
+       self.small2_idle = pg.image.load(path.join(img_dir, SE2_IMG)).convert()
+       self.large2_idle = pg.image.load(path.join(img_dir, LE2_IMG)).convert()
        self.dir = path.dirname(__file__)
        with open(path.join(self.dir, HS_FILE), 'w') as f:
            try:
