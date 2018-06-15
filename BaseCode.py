@@ -11,7 +11,7 @@ FPS = 60
 #FONT_NAME ="Acknowledge TT (BRK)"
 FONT_NAME = "Arial"
 HS_FILE = "highscore.txt"
-SPRITESHEET = "SheetoSprites.png"
+TILESIZE = 64
 
 img_dir = path.join(path.dirname(__file__), 'img')
 
@@ -35,11 +35,8 @@ GO_LIST = ["This Was Your Fault",
            "You Are Died",
            "They Don't Seem To Like You",
            "You Have Dead",
-           "This Was Not Your Fault"]
-
-#(x, y, w, h)
-PLATFORM_LIST = [(0, -40, WIDTH, 40),
-                (WIDTH / 2 - 50, HEIGHT * 3 / 4 , 100, 20)]
+           "This Was Not Your Fault",
+           "Get Styled Upon"]
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -52,6 +49,39 @@ PLAYER_ACC = 7.0
 PLAYER_FRICTION = -0.7
 PLAYER_GRAV = 0.5
 PLAYER_JUMP = 18
+
+# game properties
+DAMAGE = 100
+P_HEALTH = 250
+
+SE1_HEALTH = 200
+LE1_HEALTH = 550
+ME1_HEALTH = 300
+
+SE2_HEALTH = 250
+LE2_HEALTH = 650
+ME2_HEALTH = 400
+
+TELEPORTER = "Telepoter.png"
+
+# level variables
+JUNGLEPLAT = "JunglePlatform.png"
+GROUND_1 = "JungleGround.png"
+SE1_IMG = "Lemurian1.png"
+LE1_IMG = "TreeGolem.png"
+
+SE1_MOVE =
+LE1_MOVE =
+
+CRASHPLAT = "CrashSitePlatform.png"
+GROUND_2 = "CrashGround.png"
+SE2_IMG = "Lemurian2.png"
+LE2_IMG = "Construct.png"
+
+SE2_MOVE =
+LE2_MOVE =
+
+CURRENT_ENEMY_IMG = "SacntionIdle"
 
 class Game:
    def __init__(self):
@@ -71,14 +101,18 @@ class Game:
        img_dir = path.join(self.dir, 'img')
        self.background = pg.image.load(path.join(img_dir, "Nacht_Himmel.png")).convert()
        self.background_rect = self.background.get_rect()
+       self.jungleplat_img = pg.image.load(path.join(img_dir, JUNGLEPLAT)).convert_alpha()
+       self.crashplat_img = pg.image.load(path.join(img_dir, CRASHPLAT)).convert_alpha()
+       self.small1_idle = pg.image.load(path.join(img_dir, SE1_IMG)).convert.alpha()
+       self.large1_idle = pg.image.load(path.join(img_dir, LE1_IMG)).convert_alpha()
+       self.small2_idle = pg.image.load(path.join(img_dir, SE2_IMG)).convert_alpha()
+       self.large2_idle = pg.image.load(path.join(img_dir, LE2_IMG)).convert_alpha()
        self.dir = path.dirname(__file__)
        with open(path.join(self.dir, HS_FILE), 'w') as f:
            try:
                self.highscore = int(f.read())
            except:
                self.highscore = 0
-        #load spritesheet image
-       self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
 
    def new(self):
        # start a new game
@@ -86,14 +120,16 @@ class Game:
        self.all_sprites = pg.sprite.Group()
        self.platforms = pg.sprite.Group()
        self.items = pg.sprite.Group()
+       self.muks = pg.sprite.Group()
        self.player = Player(self)
-       self.all_sprites.add(self.player)
        for plat in PLATFORM_LIST1:
            # P = Platform(plat[0], plat[1], plat[2], plat[3])
-           p = Platform(self,*plat)
-           self.all_sprites.add(p)
-           self.platforms.add(p)
+           Platform(self,*plat)
        self.run()
+
+       if spawn.random() < percentage_chance:
+           stuff
+
 
    def run(self):
        # game loop
@@ -140,6 +176,11 @@ class Game:
 
        if self.player.rect.bottom > HEIGHT:
            self.playing = False
+
+       item_hits = pg.sprite.spritecollide(self.player, self.items, True)
+       for item in item_hits:
+           if item.type == 'Potent Brew':
+
 
    def events(self):
        for event in pg.event.get():
@@ -216,20 +257,21 @@ class Game:
        text_rect.midtop = (x, y)
        self.screen.blit(text_surface, text_rect)
 
-class Spritesheet:
+#class Spritesheet:
     #loads and parses spritesheets
-    def __init__(self, filename):
-        self.spritesheet = pg.image.load(filename).convert()
+    #def __init__(self, filename):
+        #self.spritesheet = pg.image.load(filename).convert()
 
-    def get_image(self, x, y, width, height):
-        image = pg.Surface((width, height))
-        image.blit(self.spritesheet, (0, 0), (x, y, width, height))
-        #image = pg.transform.scale(image, (width * 2, height * 2))
-        return image
+    #def get_image(self, x, y, width, height):
+        #image = pg.Surface((width, height))
+        #image.blit(self.spritesheet, (0, 0), (x, y, width, height))
+         #image = pg.transform.scale(image, (width * 2, height * 2))
+        #return image
 
 class Player(pg.sprite.Sprite):
    def __init__(self, game):
-       pg.sprite.Sprite.__init__(self)
+       self.groups = game.all_sprites
+       pg.sprite.Sprite.__init__(self, self.groups)
        self.game = game
        self.run = False
        self.jumping = False
@@ -324,7 +366,7 @@ class Player(pg.sprite.Sprite):
 class Platform(pg.sprite.Sprite):
    def __init__(self, game, x, y):
        self.groups = game.all_sprites, game.platforms
-       pg.sprite.Sprite.__init__(self)
+       pg.sprite.Sprite.__init__(self, self.groups)
        self.game = game
        images = [#platform xml co-ords
                 ]
@@ -341,35 +383,32 @@ class Item(pg.sprite.Sprite):
        self.game = game
        self.plat = plat
        self.type = random.choice([#Standard Items
-                                  'Thick Dew', 'Thornquill', 'Shock Bracelet',
-                                  'Illicit Acquisitions', 'Bronze Monocle',
+                                  'Thornquill'], ['Shock Bracelet'],
+                                  ['Illicit Acquisitions'],
                                   #Priority Items
-                                  'Antique Dollar Bill', 'Potent Brew', 'Eclipse Dagger',
-                                  'Civilian Taser', 'Box o Wonders',
+                                  ['Potent Brew'], ['Eclipse Dagger'],
                                   #Fragile Items
-                                  "Family Ruby", "Broken Watch",
-                                  "Purple Amulet", "Regenerophage Sample",
+                                  ["Family Ruby"],
                                   #Military Items
-                                  "Portable AI Mines", "Defective Tesla Gun",
-                                  "Targeting System Scope", "Wrist Mounted Micro Cannon",
-                                  "Portable AT Mine Layer"])
+                                  ["Defective Tesla Gun"],["Targeting System Scope"],
+                                  ["Wrist Mounted Micro Cannon"], ["Portable AT Mine Layer"])
+       self.image = self.game.spritesheet.get_image(#xml co-ords
+                                                    )
        self.image.set_colorkey(BLACK)
        self.rect = self.image.get_rect()
        self.rect.centerx = self.plat.rect.centerx
-       self.rect.bottom = self.plat.rect.top - 5
+       self.rect.bottom = self.plat.rect.top - 10
 
    def update(self):
-       self.rect.bottom = self.plat.rect.top - 5
+       self.rect.bottom = self.plat.rect.top - 10
 
 class Muk(pg.sprite.Sprite):
    def __init__(self):
+       self.groups = game.all_sprites, game.muks
        pg.sprite.Sprite.__init__(self)
-       self.image = pg.Surface((30, 40))
-       self.image.fill(GREEN)
+       self.image = CURRENT_ENEMY_IMG
        self.rect = self.image.get_rect()
-       self.rect.x = random.randrange(WIDTH + self.rect.width)
-       self.rect.y = random.randrange(-100, -40)
-       self.speedy = 3
+       self.pos = vec(x, y) * TILESIZE
 
    def update(self):
        self.rect.x += self.speedy
