@@ -4,7 +4,7 @@ from os import path
 
 vec = pg.math.Vector2
 
-TITLE = "idkWhatToPutHereIGuessThis'llDoForNow"
+TITLE = "Return"
 WIDTH = 800
 HEIGHT = 450
 FPS = 60
@@ -44,6 +44,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 DEEP_BLUE = (0, 2, 43)
+FOREST_GREEN = (11, 102, 35)
 
 PLAYER_ACC = 7.0
 PLAYER_FRICTION = -0.7
@@ -63,28 +64,29 @@ LE2_HEALTH = 650
 ME2_HEALTH = 400
 
 TELEPORTER = "Telepoter.png"
+PLAYER_IDLE = "Survivor.png"
 
 # level variables
 JUNGLEPLAT = "JunglePlatform.png"
-GROUND_1 = "JungleGround.png"
+#GROUND_1 = "JungleGround.png"
 SE1_IMG = "Lemurian1.png"
 LE1_IMG = "TreeGolem.png"
 
-SE1_MOVE =
-LE1_MOVE =
+#SE1_MOVE =
+#LE1_MOVE =
 
 CRASHPLAT = "CrashSitePlatform.png"
-GROUND_2 = "CrashGround.png"
+#GROUND_2 = "CrashGround.png"
 SE2_IMG = "Lemurian2.png"
 LE2_IMG = "Construct.png"
 
-SE2_MOVE =
-LE2_MOVE =
+#SE2_MOVE =
+#LE2_MOVE =
 
-CURRENT_ENEMY_IMG = "SacntionIdle"
+#CURRENT_ENEMY_IMG = "SacntionIdle"
 
 class Game:
-   def __init__(self):
+    def __init__(self):
        # creates window
        pg.init()
        pg.mixer.init()
@@ -95,12 +97,13 @@ class Game:
        self.font_name = pg.font.match_font(FONT_NAME)
        self.load_data()
 
-   def load_data(self):
+    def load_data(self):
        #loads game assets from folder
        self.dir = path.dirname(__file__)
        img_dir = path.join(self.dir, 'img')
        self.background = pg.image.load(path.join(img_dir, "Nacht_Himmel.png")).convert()
        self.background_rect = self.background.get_rect()
+       self.player_img = pg.image.load(path.join(img_dir, PLAYER_IDLE)).convert()
        self.jungleplat_img = pg.image.load(path.join(img_dir, JUNGLEPLAT)).convert()
        self.crashplat_img = pg.image.load(path.join(img_dir, CRASHPLAT)).convert()
        self.small1_idle = pg.image.load(path.join(img_dir, SE1_IMG)).convert()
@@ -114,7 +117,7 @@ class Game:
            except:
                self.highscore = 0
 
-   def new(self):
+    def new(self):
        # start a new game
        self.score = 0
        self.all_sprites = pg.sprite.Group()
@@ -124,14 +127,16 @@ class Game:
        self.player = Player(self)
        for plat in PLATFORM_LIST1:
            # P = Platform(plat[0], plat[1], plat[2], plat[3])
-           Platform(self,*plat)
-       self.run()
+            p = Platform(*plat)
+            self.all_sprites.add(p)
+            self.platforms.add(p)
+            self.run()
 
-       if spawn.random() < percentage_chance:
-           stuff
+        #if spawn.random() < percentage_chance:
+           #stuff
 
 
-   def run(self):
+    def run(self):
        # game loop
        self.playing = True
        while self.playing:
@@ -140,7 +145,7 @@ class Game:
            self.update()
            self.draw()
 
-   def update(self):
+    def update(self):
        self.all_sprites.update()
        # check for platform
        if self.player.vel.y > 0:
@@ -150,7 +155,7 @@ class Game:
                for hit in hits:
                    if hit.rect.bottom > lowest.rect.bottom:
                        lowest = hit
-               if self.player.pox.x < lowest.rect.right + 5 and self.player.pos.x > lowest.rect.left + 5:
+               if self.player.pos.x < lowest.rect.right + 5 and self.player.pos.x > lowest.rect.left + 5:
                     if self.player.pos.y < lowest.rect.bottom:
                         #self.player.pos.y = hits[0].rect.top
                         self.player.pos.y = lowest.rect.top + 1
@@ -177,25 +182,20 @@ class Game:
        if self.player.rect.bottom > HEIGHT:
            self.playing = False
 
-       item_hits = pg.sprite.spritecollide(self.player, self.items, True)
-       for item in item_hits:
-           if item.type == 'Potent Brew':
-
-
-   def events(self):
-       for event in pg.event.get():
-           if event.type == pg.QUIT:
-               if self.playing:
+    def events(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                if self.playing:
                    self.playing = False
-               self.running = False
-           if event.type == pg.KEYDOWN:
-               if event.key == pg.K_SPACE:
+                self.running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
                    self.player.jump()
-           if event.type == pg.KEYUP:
-               if event.key == pg.K_SPACE:
+            if event.type == pg.KEYUP:
+                if event.key == pg.K_SPACE:
                    self.player.jump_cut()
 
-   def draw(self):
+    def draw(self):
        self.screen.fill(BLACK)
        self.screen.blit(self.background, self.background_rect)
        self.all_sprites.draw(self.screen)
@@ -203,25 +203,25 @@ class Game:
        self.draw_text(str(self.score), 22, WHITE, WIDTH / 2, 15)
        pg.display.flip()
 
-   def show_start_screen(self):
+    def show_start_screen(self):
        # start screen
        #("text", size, color, x, y)
        self.screen.fill(DEEP_BLUE)
        self.screen.fill(BLACK)
-       self.draw_text("TELEPORT", 40, WHITE, WIDTH / 2, HEIGHT / 4)
-       self.draw_text("CHOOSE CHARACTER TO START", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+       self.draw_text("RETURN", 40, WHITE, WIDTH / 2, HEIGHT / 4)
+       self.draw_text("PRESS Z, X, C, V, OR SPACE TO START", 22, WHITE, WIDTH / 2, HEIGHT * 3 / 4)
        self.draw_text("HIGH SCORE: " + str(self.highscore), 22, WHITE, WIDTH / 2, 15)
        pg.display.flip()
        self.wait_for_key()
 
-   def show_go_screen(self):
+    def show_go_screen(self):
        # game over screen
        if not self.running:
            return
        self.screen.fill(DEEP_BLUE)
        self.draw_text(random.choice(GO_LIST))
        self.draw_text("Score: " + str(self.score), 22, WHITE, WIDTH / 2, HEIGHT / 2)
-       self.draw_text("CHOOSE CHARACTER TO START AGAIN", 22., WHITE, WIDTH / 2, HEIGHT * 3 / 4)
+       self.draw_text("PRESS Z, X, C, V, OR SPACE TO START AGAIN", 22., WHITE, WIDTH / 2, HEIGHT * 3 / 4)
        if self.score > self.highscore:
            self.highscore = self.score
            with open(path.join(self.dir, HS_FILE), 'w') as f:
@@ -229,7 +229,7 @@ class Game:
        pg.display.flip()
        self.wait_for_key()
 
-   def wait_for_key(self):
+    def wait_for_key(self):
        #keeps start and g.o. screen on screen until corresponding key is pressed
        waiting = True
        while waiting:
@@ -250,7 +250,7 @@ class Game:
                    if event.key == pg.K_SPACE:
                        waiting = False
 
-   def draw_text(self, text, size, color, x, y):
+    def draw_text(self, text, size, color, x, y):
        font = pg.font.Font(self.font_name, size)
        text_surface =font.render(text, True, color)
        text_rect = text_surface.get_rect()
@@ -269,7 +269,7 @@ class Game:
         #return image
 
 class Player(pg.sprite.Sprite):
-   def __init__(self, game):
+    def __init__(self, game):
        self.groups = game.all_sprites
        pg.sprite.Sprite.__init__(self, self.groups)
        self.game = game
@@ -290,28 +290,26 @@ class Player(pg.sprite.Sprite):
        self.vel = vec(0, 0)
        self.acc = vec(0, 0)
 
-   def load_images(self):
-       self.standing_frame = [self.game.spritesheet.get_image(0, 0, 28, 22)]
-       self.run_frames_l = [self.game.spritesheet.get_image(0, 26, 28, 20),
-                             self.game.spritesheet.get_image(0, 50, 28, 20),
-                             self.game.spritesheet.get_image(0, 72, 28, 22),
-                             self.game.spritesheet.get_image(0, 96, 28, 22),
-                             self.game.spritesheet.get_image(0, 122, 28, 20),
-                             self.game.spritesheet.get_image(0, 146, 28, 20),
-                             self.game.spritesheet.get_image(0, 168, 28, 22),
-                             self.game.spritesheet.get_image(0, 192, 28, 22)]
+    def load_images(self):
+       self.standing_frame = [pg.image.load(path.join(img_dir, PLAYER_IDLE)).convert()]
+       self.run_frames_l = [(pg.image.load(path.join(img_dir, "SurvivorRun1.png")).convert()),
+                            (pg.image.load(path.join(img_dir, "SurvivorRun2.png")).convert()),
+                            (pg.image.load(path.join(img_dir, "SurvivorRun3.png")).convert()),
+                            (pg.image.load(path.join(img_dir, "SurvivorRun4.png")).convert()),
+                            (pg.image.load(path.join(img_dir, "SurvivorRun5.png")).convert()),
+                            (pg.image.load(path.join(img_dir, "SurvivorRun6.png")).convert()), ]
        self.run_frames_r = []
        for frame in self.run_frames_l:
            self.run_frames_r.append(pg.transform.flip(frame, True, False))
-       self.jump_frame = self.game.spritesheet.get_image(0, 216, 28, 22)
+       self.jump_frame = pg.image.load(path.join(img_dir, "SurvivorJump.png")).convert()
 
-   def jump_cut(self):
+    def jump_cut(self):
        if self.jumping:
            if self.vel.y < -3:
                self.vel.y = -3
 
 
-   def jump(self):
+    def jump(self):
        # will jump only on platform
        self.rect.x += 2
        hits = pg.sprite.spritecollide(self, self.game.platforms, False)
@@ -320,7 +318,7 @@ class Player(pg.sprite.Sprite):
            self.jumping = True
            self.vel.y = -PLAYER_JUMP
 
-   def update(self):
+    def update(self):
        self.animate()
        self.acc = vec(0, PLAYER_GRAV)
        keys = pg.key.get_pressed()
@@ -344,7 +342,7 @@ class Player(pg.sprite.Sprite):
 
        self.rect.midbottom = self.pos
 
-   def animate(self):
+    def animate(self):
        now = pg.time.get_ticks()
        if self.vel.x != 0:
            self.run = True
@@ -364,20 +362,23 @@ class Player(pg.sprite.Sprite):
                self.rect.bottom = bottom
 
 class Platform(pg.sprite.Sprite):
-   def __init__(self, game, x, y):
+    def __init__(self, x, y, w, h):
        self.groups = game.all_sprites, game.platforms
        pg.sprite.Sprite.__init__(self, self.groups)
        self.game = game
-       images = [#platform xml co-ords
-                ]
-       self.image = random.choice(images)
-       self.image.set_colorkey(BLACK)
+       self.image = pg.Surface((w, h))
+       self.image.fill(WHITE)
+
+       #images = [#platform xml co-ords
+       #pg.image.load(path.join(img_dir, JUNGLEPLAT)).convert()]
+       #self.image = random.choice(images)
+       #self.image.set_colorkey(BLACK)
        self.rect = self.image.get_rect()
        self.rect.x = x
        self.rect.y = y
 
 class Item(pg.sprite.Sprite):
-   def __init__(self, game, plat):
+    def __init__(self, game, plat):
        self.groups = game.all_sprites, game.items
        pg.sprite.Sprite.__init__(self, self.groups)
        self.game = game
@@ -399,7 +400,7 @@ class Item(pg.sprite.Sprite):
        self.rect.centerx = self.plat.rect.centerx
        self.rect.bottom = self.plat.rect.top - 10
 
-   def update(self):
+    def update(self):
        self.rect.bottom = self.plat.rect.top - 10
 
 class Muk(pg.sprite.Sprite):
@@ -409,9 +410,6 @@ class Muk(pg.sprite.Sprite):
        self.image = CURRENT_ENEMY_IMG
        self.rect = self.image.get_rect()
        self.pos = vec(x, y) * TILESIZE
-
-   def update(self):
-       self.rect.x += self.speedy
 
 
 g = Game()
